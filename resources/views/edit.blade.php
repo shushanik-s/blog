@@ -3,14 +3,15 @@
 <head>
     <meta charset="utf-8">
     <title>Edit a Post</title>
-    <link rel="stylesheet" href="{{asset('sass/app.scss')}}">
+    <link rel="stylesheet" href="{{asset('css/app.css')}}">
+    <link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <div class="container">
-    <h2>Edit A Form</h2><br  />
-    <form method="post" action="{{action('PostController@update', $id)}}">
+    <h2>Edit Your Post</h2><br>
+    <form method="post" action="{{action('PostController@update', $id)}}" enctype="multipart/form-data">
         {{ csrf_field() }}
-        <input name="_method" type="hidden" value="PATCH">
+        {{ method_field('PUT') }}
         <div class="row">
             <div class="col-md-4"></div>
             <div class="form-group col-md-4">
@@ -27,8 +28,14 @@
         </div>
         <div class="row">
             <div class="col-md-4"></div>
-            <div class="form-group col-md-4" style="margin-top:60px">
-                <button type="submit" class="btn btn-success" style="margin-left:38px">Update</button>
+            <div class="form-group col-md-4">
+                <input type="file" name="image">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <button type="submit" class="btn btn-success" style="float:right;">Update</button>
             </div>
         </div>
     </form>

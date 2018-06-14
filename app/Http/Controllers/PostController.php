@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
+
+use App\Http\Controllers\Controller;
 use App\Post as Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use Intervention\Image\Facades\Image;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -19,7 +25,7 @@ class PostController extends Controller
     public function index()
     {
         $id = Auth::user()->id;
-        $posts = DB::table('posts')->where('user_id', $id)->get();
+        $posts = DB::table('posts')->where('user_id', $id)->paginate(4);
 
         return View::make('home')->with('posts', $posts);
     }
@@ -45,21 +51,27 @@ class PostController extends Controller
     {
         $this->validate($request, [
             'title' => 'required',
-            'content' => 'required'
+            'content' => 'required',
         ]);
 
-        if($request->hasfile('filename'))
-        {
-            $file = $request->file('filename');
-            $name = time().$file->getClientOriginalName();
-            $file->move(public_path().'/images/', $name);
+        $post = new Model;
+
+        if($file = $request->hasFile('image') ) {
+            $image =  $request->file('image');
+            $post_thumbnail     = $request->file('image');
+            $filename           = time() . '.' . $post_thumbnail->getClientOriginalExtension();
+            $destinationPath    = public_path('/images/');
+
+            Image::make($post_thumbnail)->resize(100, 100)->save($destinationPath . '/thumb_' . $filename);
+
+            $image->move(public_path().'/images/', time() . '.' . $post_thumbnail->getClientOriginalExtension());
+            $post->imgThumb = '/thumb_'.$filename;
+            $post->img      = $filename;
         }
 
-        $post = new Model;
         $post->title   = $request->get('title');
-        $post->content = $request->get('title');
+        $post->content = $request->get('content');
         $post->user_id = Auth::user()->id;
-        $post->img     = $name;
         $post->save();
 
         return redirect('posts')->with('success', 'Post has been added');
@@ -84,7 +96,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        $post = Model::find($id);
+        $post = \App\Post::find($id);
         return view('edit',compact('post','id'));
     }
 
@@ -97,7 +109,27 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $post = \App\Post::find($id);
 
+        if($file = $request->hasFile('image') ) {
+            var_dump('aaa');
+            $image =  $request->file('image');
+            $post_thumbnail     = $request->file('image');
+            $filename           = time() . '.' . $post_thumbnail->getClientOriginalExtension();
+            $destinationPath    = public_path('/images');
+
+            Image::make($post_thumbnail)->fit(100, 100)->save($destinationPath . 'thumb_' . $filename);
+
+            $image->move(public_path().'images', time() . '.' . $post_thumbnail->getClientOriginalExtension());
+            $post->imgThumb = 'thumb_'.$filename;
+            $post->img      = $filename;
+        }
+
+        $post->title = $request->get('title');
+        $post->content = $request->get('content');
+        $post->save();
+
+        return redirect('posts')->with('success', 'Post has been updated');
     }
 
     /**
@@ -108,6 +140,8 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-
+        $post = \App\Post::find($id);
+        $post->delete();
+        return redirect('posts')->with('success','Post has been deleted');
     }
 }
