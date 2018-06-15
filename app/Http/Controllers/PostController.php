@@ -25,7 +25,7 @@ class PostController extends Controller
     public function index()
     {
         $id = Auth::user()->id;
-        $posts = DB::table('posts')->where('user_id', $id)->paginate(4);
+        $posts = DB::table('posts')->latest()->where('user_id', $id)->where('deleted_at', null)->paginate(4);
 
         return View::make('home')->with('posts', $posts);
     }
@@ -140,7 +140,8 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = \App\Post::find($id);
+        $post = Model::findOrFail($id);
+        var_dump($post);
         $post->delete();
         return redirect('posts')->with('success','Post has been deleted');
     }

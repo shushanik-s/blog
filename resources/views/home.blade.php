@@ -37,23 +37,43 @@
 
                                     <td><a href="{{action('PostController@edit', $post->id)}}" class="btn btn-warning">Edit</a></td>
                                     <td>
-                                        <form action="{{action('PostController@destroy', $post->id)}}" method="post">
-                                            {{ csrf_field() }}
-                                            <input name="_method" type="hidden" value="DELETE">
-                                            <button class="btn btn-danger" type="submit">Delete</button>
-                                        </form>
+                                        <button class="btn btn-danger delete" data-toggle="modal" data-target="#confirm-delete" data-id="{{ $post->id }}">Delete</button>
                                     </td>
                                 </tr>
                             @endforeach
-
-
                         </tbody>
                     </table>
                 </div>
-                {{--{{ $posts->links() }}--}}
+                @if(isset($posts->links)) {
+                    {{ $posts->links }}
+                }
+                @endif
 
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    Are you sure you want to delete the post?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Delete</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    $(function() {
+        $('.delete').click(function () {
+            var post_id = $(this).data('id');
+
+        })
+    });
+</script>
